@@ -1,9 +1,9 @@
 # netsnmp
 
 [![Gem Version](https://badge.fury.io/rb/netsnmp.svg)](http://rubygems.org/gems/netsnmp)
-![Tests](https://github.com/swisscom/ruby-netsnmp/workflows/Tests/badge.svg)
-[![Code Climate](https://codeclimate.com/github/swisscom/ruby-netsnmp/badges/gpa.svg)](https://codeclimate.com/github/swisscom/ruby-netsnmp)
-[![Docs](http://img.shields.io/badge/yard-docs-blue.svg)](https://www.rubydoc.info/github/swisscom/ruby-netsnmp/master)
+![Tests](https://github.com/HoneyryderChuck/ruby-netsnmp/workflows/Tests/badge.svg)
+[![Code Climate](https://codeclimate.com/github/HoneyryderChuck/ruby-netsnmp/badges/gpa.svg)](https://codeclimate.com/github/HoneyryderChuck/ruby-netsnmp)
+[![Docs](http://img.shields.io/badge/yard-docs-blue.svg)](https://www.rubydoc.info/github/HoneyryderChuck/ruby-netsnmp/master)
 
 The `netsnmp` gem provides a ruby native implementation of the SNMP protocol (v1/2c abd v3).
 
@@ -127,7 +127,7 @@ The `NETSNMP::Timeticks` type is internal to this library, but it is a ruby `Num
 
 Counter32 and Counter64 types will map to plain integers.
 
-You can find usage examples [here](https://github.com/swisscom/ruby-netsnmp/blob/master/spec/varbind_spec.rb). If you need support to a missing type, you have the following options:
+You can find usage examples [here](https://github.com/HoneyryderChuck/ruby-netsnmp/blob/master/spec/varbind_spec.rb). If you need support to a missing type, you have the following options:
 
 * Use the `:type` parameter in `#set` calls:
 ```ruby
