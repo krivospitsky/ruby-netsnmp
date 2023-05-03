@@ -136,7 +136,13 @@ module NETSNMP
 
       # The digest in the msgAuthenticationParameters field is replaced by the 12 zero octets.
       # 24 octets for sha256
-      number_of_octets = auth_protocol == :sha256 ? 24 : 12
+      number_of_octets = case auth_protocol
+                         when :sha512 then 48
+                         when :sha384 then 32
+                         when :sha256 then 24
+                         when :sha224 then 16
+                         else 12
+                         end
 
       OpenSSL::ASN1::OctetString.new("\x00" * number_of_octets).with_label(:auth_mask)
     end
