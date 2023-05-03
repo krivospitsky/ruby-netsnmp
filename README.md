@@ -32,36 +32,14 @@ $ gem install netsnmp
 This gem provides:
 
 * Implementation in ruby of the SNMP Protocol for v3, v2c and v1 (most notable the rfc3414 and 3826).
-* SNMPv3 USM supporting MD5/SHA/SHA256 auth and DES/AES128 privacy crypto algorithms.
+* SNMPv3 USM supporting MD5/SHA1/SHA224/SHA256/SHA384/SHA512 auth and DES/AES128/AES192/AES256 privacy crypto algorithms.
 * Client/Manager API with simple interface for get, genext, set and walk.
-* Pure Ruby.
-* Support for concurrency and evented I/O.
-
-## Why?
-
-If you look for snmp gems in ruby toolbox, you'll find a bunch.
-You may ask, why not just use one of them?
-
-Most of them only implement v1 and v2, so if your requirement is to use v3, you're left with only 2 choices: [net-snmp](https://github.com/mixtli/net-snmp) (unmantained since 2013) and its follow-up [net-snmp2](https://github.com/jbreeden/net-snmp2), which started as a fork to fix some bugs left unattended. Both libraries wrap the C netsnmp library using FFI, which leaves them vulnerable to the following bugs (experienced in both libraries):
-
-* Dependency of specific versions of netsnmp C package.
-* Memory Leaks.
-* Doesn't work reliable in ruby > 2.0.0-p576, crashing the VM.
-* Network I/O done by the library, thereby blocking the GVL, thereby making all snmp calls block the whole ruby VM.
-  * This means, multi-threading is impossible.
-  * This means, evented I/O is impossible.
-
-All of these issues are resolved here.
-
-## Features
-
-* Client Interface, which supports SNMP v3, v2c, and v1
-* Supports get, getnext, set and walk calls
 * MIB support
 * Proxy IO object support (for eventmachine/celluloid-io)
-* Ruby >= 2.1 support (modern)
 * Pure Ruby (no FFI)
 * Easy PDU debugging
+* Support for concurrency and evented I/O.
+
 
 ## Examples
 

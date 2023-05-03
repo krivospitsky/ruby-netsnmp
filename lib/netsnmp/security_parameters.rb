@@ -133,12 +133,12 @@ module NETSNMP
       case @auth_protocol
       when :sha224
         return OpenSSL::HMAC.digest("SHA224", key, message)[0, 16]
+      when :sha384
+        return OpenSSL::HMAC.digest("SHA384", key, message)[0, 32]
       when :sha256
         # The 24 first octets of HMAC are taken as the computed MAC value
         # SHA256 => https://datatracker.ietf.org/doc/html/rfc7860#section-4.2.2
         return OpenSSL::HMAC.digest("SHA256", key, message)[0, 24]
-      when :sha384
-        return OpenSSL::HMAC.digest("SHA384", key, message)[0, 32]
       when :sha512
         return OpenSSL::HMAC.digest("SHA512", key, message)[0, 48]
       when :md5
