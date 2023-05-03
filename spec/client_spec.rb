@@ -157,10 +157,37 @@ RSpec.describe NETSNMP::Client do
           let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
         end
       end
+      context "speaking sha224" do
+        let(:user_options) do
+          { username: "authsha224", security_level: :auth_no_priv,
+            auth_password: "maplesyrup", auth_protocol: :sha224 }
+        end
+        it_behaves_like "an snmp client" do
+          let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+        end
+      end
+      context "speaking sha384" do
+        let(:user_options) do
+          { username: "authsha384", security_level: :auth_no_priv,
+            auth_password: "maplesyrup", auth_protocol: :sha384 }
+        end
+        it_behaves_like "an snmp client" do
+          let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+        end
+      end
       context "speaking sha256" do
         let(:user_options) do
           { username: "authsha256", security_level: :auth_no_priv,
             auth_password: "maplesyrup", auth_protocol: :sha256 }
+        end
+        it_behaves_like "an snmp client" do
+          let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+        end
+      end
+      context "speaking sha512" do
+        let(:user_options) do
+          { username: "authsha512", security_level: :auth_no_priv,
+            auth_password: "maplesyrup", auth_protocol: :sha512 }
         end
         it_behaves_like "an snmp client" do
           let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
@@ -219,6 +246,36 @@ RSpec.describe NETSNMP::Client do
         end
         it_behaves_like "an snmp client" do
           let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+        end
+        context "auth in sha224, encrypting in aes" do
+          let(:user_options) do
+            { username: "authprivsha224aes", auth_password: "maplesyrup",
+              auth_protocol: :sha224, priv_password: "maplesyrup",
+              priv_protocol: :aes }
+          end
+          it_behaves_like "an snmp client" do
+            let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+          end
+        end
+        context "auth in sha384, encrypting in aes192" do
+          let(:user_options) do
+            { username: "authprivsha384aes192", auth_password: "maplesyrup",
+              auth_protocol: :sha384, priv_password: "maplesyrup",
+              priv_protocol: :aes192 }
+          end
+          it_behaves_like "an snmp client" do
+            let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+          end
+        end
+        context "auth in sha512, encrypting in aes256" do
+          let(:user_options) do
+            { username: "authprivsha512aes256", auth_password: "maplesyrup",
+              auth_protocol: :sha512, priv_password: "maplesyrup",
+              priv_protocol: :aes256 }
+          end
+          it_behaves_like "an snmp client" do
+            let(:protocol_options) { version_options.merge(user_options).merge(extra_options) }
+          end
         end
       end
     end

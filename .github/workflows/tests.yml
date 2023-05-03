@@ -7,11 +7,7 @@
 
 name: Tests
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ '**' ]
+on: [push]
 
 jobs:
   tests:

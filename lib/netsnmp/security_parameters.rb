@@ -130,13 +130,25 @@ module NETSNMP
 
       key = auth_key.dup
 
-      # SHA256 => https://datatracker.ietf.org/doc/html/rfc7860#section-4.2.2
-      # The 24 first octets of HMAC are taken as the computed MAC value
-      return OpenSSL::HMAC.digest("SHA256", key, message)[0, 24] if @auth_protocol == :sha256
+      case @auth_protocol
+      when :sha224
+        return OpenSSL::HMAC.digest("SHA224", key, message)[0, 16]
+      when :sha256
+        # The 24 first octets of HMAC are taken as the computed MAC value
+        # SHA256 => https://datatracker.ietf.org/doc/html/rfc7860#section-4.2.2
+        return OpenSSL::HMAC.digest("SHA256", key, message)[0, 24]
+      when :sha384
+        return OpenSSL::HMAC.digest("SHA384", key, message)[0, 32]
+      when :sha512
+        return OpenSSL::HMAC.digest("SHA512", key, message)[0, 48]
+      when :md5
+        # MD5 => https://datatracker.ietf.org/doc/html/rfc3414#section-6.3.2
+        key << ("\x00" * 48)
+      when :sha, :sha1
+        # SHA1 => https://datatracker.ietf.org/doc/html/rfc3414#section-7.3.2
+        key << ("\x00" * 44)
+      end
 
-      # MD5 => https://datatracker.ietf.org/doc/html/rfc3414#section-6.3.2
-      # SHA1 => https://datatracker.ietf.org/doc/html/rfc3414#section-7.3.2
-      key << ("\x00" * (@auth_protocol == :md5 ? 48 : 44))
       k1 = key.xor(IPAD)
       k2 = key.xor(OPAD)
 
@@ -177,7 +189,20 @@ module NETSNMP
     end
 
     def priv_key
-      @priv_key ||= localize_key(@priv_pass_key)
+      @priv_key ||= begin
+        key = localize_key(@priv_pass_key)
+        # AES-192, AES-256 require longer localized keys,
+        # which require adding of subsequent localized_priv_keys based on the previous until the length is satisfied
+        # The only hint to this is available in the python implementation called pysnmp
+        priv_key_size = case @priv_protocol
+                        when :aes256 then 32
+                        when :aes192 then 24
+                        else 16
+                        end
+
+        key += localize_key(passkey(key)) while key.size < priv_key_size
+        key
+      end
     end
 
     def localize_key(key)
@@ -205,15 +230,27 @@ module NETSNMP
       end
 
       dig = digest.digest
-      dig = dig[0, 16] if @auth_protocol == :md5
+      dig_size = case @auth_protocol
+                 when :sha512 then 64
+                 when :sha384 then 48
+                 when :sha256 then 32
+                 when :sha224 then 28
+                 when :sha1, :sha then 20
+                 else 16
+                 end
+
+      dig[0, dig_size]
       dig || ""
     end
 
     def digest
       @digest ||= case @auth_protocol
                   when :md5 then OpenSSL::Digest.new("MD5")
-                  when :sha then OpenSSL::Digest.new("SHA1")
+                  when :sha, :sha1 then OpenSSL::Digest.new("SHA1")
+                  when :sha224 then OpenSSL::Digest.new("SHA224")
                   when :sha256 then OpenSSL::Digest.new("SHA256")
+                  when :sha384 then OpenSSL::Digest.new("SHA384")
+                  when :sha512 then OpenSSL::Digest.new("SHA512")
                   else
                     raise Error, "unsupported auth protocol: #{@auth_protocol}"
                   end
@@ -222,7 +259,7 @@ module NETSNMP
     def encryption
       @encryption ||= case @priv_protocol
                       when :des then Encryption::DES.new(priv_key)
-                      when :aes then Encryption::AES.new(priv_key)
+                      when :aes, :aes192, :aes256 then Encryption::AES.new(priv_key, cipher: @priv_protocol)
                       end
     end
 

@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
     "documentation_uri" => "https://www.rubydoc.info/github/HoneyryderChuck/ruby-netsnmp",
     "source_code_uri" => "https://github.com/HoneyryderChuck/ruby-netsnmp",
     "homepage_uri" => "https://github.com/HoneyryderChuck/ruby-netsnmp",
-    "rubygems_mfa_required" => "true",
+    "rubygems_mfa_required" => "true"
   }
 
   # Manifest
