@@ -2,6 +2,16 @@
 
 ## master
 
+### 0.7.0
+
+#### Features
+
+Added support for SHA224, SHA384, SHA512, AES192, AES256 auth/priv protocols.
+
+#### Bugfixes
+
+* MIB parser supports `OBJECT-IDENTITY` now.
+
 ### 0.6.4
 
 Making the octet string in msgAuthenticationParameters 0-length when no authentication is to happen (some SNMP implementations are quite strict in this point).
