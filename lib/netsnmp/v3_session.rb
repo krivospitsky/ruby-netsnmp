@@ -93,7 +93,7 @@ module NETSNMP
         when "1.3.6.1.6.3.15.1.1.3.0" # usmStatsUnknownUserNames
           raise Error, "Unknown user name"
         when "1.3.6.1.6.3.15.1.1.4.0" # usmStatsUnknownEngineIDs
-          raise Error, "Unknown engine ID" unless @security_parameters.must_revalidate?
+          raise UnknownEngineIdError, "Unknown engine ID" unless @security_parameters.must_revalidate?
         when "1.3.6.1.6.3.15.1.1.5.0" # usmStatsWrongDigests
           raise Error, "Authentication failure (incorrect password, community or key)"
         when "1.3.6.1.6.3.15.1.1.6.0" # usmStatsDecryptionErrors

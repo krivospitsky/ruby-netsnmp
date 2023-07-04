@@ -8,6 +8,9 @@ module NETSNMP
   class AuthenticationFailed < Error
   end
 
+  class UnknownEngineIdError < Error
+  end
+
   class IdNotInTimeWindowError < Error
   end
 end
