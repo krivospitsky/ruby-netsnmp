@@ -2,6 +2,12 @@
 
 ## master
 
+### 0.7.1
+
+#### Bugfixes
+
+* Allow for retries on unknownEngineID error.
+
 ### 0.7.0
 
 #### Features
