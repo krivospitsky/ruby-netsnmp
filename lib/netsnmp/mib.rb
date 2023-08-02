@@ -18,6 +18,8 @@ module NETSNMP
 
     @modules_loaded = []
     @object_identifiers = {}
+    @syntax={}
+
     # Translates na identifier, such as "sysDescr", into an OID
     def oid(identifier)
       prefix, *suffix = case identifier
@@ -53,10 +55,12 @@ module NETSNMP
     end
 
     def identifier(oid)
-      @object_identifiers.select do |_, ids_oid|
-        oid.start_with?(ids_oid)
-      end.min_by(&:size)
-    end
+      tmp=@object_identifiers.select do |_, ids_oid|
+        oid==ids_oid
+      end
+      return tmp.first[0] if tmp.length>0
+      return nil
+  end
 
     #
     # Loads a MIB. Can be called multiple times, as it'll load it once.
@@ -114,11 +118,18 @@ module NETSNMP
 
       declarations = Hash[
         data[:declarations].reject { |dec| !dec.key?(:name) || !TYPES.include?(dec[:type]) }
-                           .map { |dec| [String(dec[:name]), String(dec[:value]).split(/ +/)] }
+                           .map { |dec| [String(dec[:name]), [String(dec[:value]).split(/ +/), dec[:syntax]]]}
       ]
 
       declarations.each do |nme, value|
-        store_oid_in_identifiers(nme, value, imports: imports, declarations: declarations)
+        store_oid_in_identifiers(nme, value[0], imports: imports, declarations: declarations)
+        store_syntax(nme.to_s, value[1])
+      end
+
+      syntax = data[:declarations].reject { |dec| !dec.key?(:vartype) || !dec.key?(:syntax) }
+
+      syntax.each do |type|
+        store_syntax(type[:vartype].to_s, type[:syntax])
       end
     end
 
@@ -129,7 +140,7 @@ module NETSNMP
         elsif @object_identifiers.key?(cp)
           @object_identifiers[cp]
         elsif declarations.key?(cp)
-          store_oid_in_identifiers(cp, declarations[cp], imports: imports, declarations: declarations)
+          store_oid_in_identifiers(cp, declarations[cp][0], imports: imports, declarations: declarations)
           @object_identifiers[cp]
         else
           STATIC_MIB_TO_OID[cp] || begin
@@ -149,6 +160,53 @@ module NETSNMP
       end.join(".")
 
       @object_identifiers[nme] = oid
+    end
+
+
+    def store_syntax(nme, syntax)
+      if syntax
+          @syntax[nme]=syntax
+      end
+    end
+
+    def get_syntax(name)
+      s=@syntax[name]
+      if s
+          if s.is_a?(Hash) && s.key?(:value)
+              s2=get_syntax(s[:value].to_s)
+              if s2 && !s2.empty?
+                  return s2
+              else
+                  return {name: name, syntax: s}
+              end
+          else
+              return {name: name, syntax: s}
+          end
+      end
+      return nil
+    end
+
+    def process_syntax(name, value)
+      return value.inspect if value.is_a?(NETSNMP::HexString)
+      return value.to_i if value.is_a?(NETSNMP::Timetick)
+
+      syntax_obj=get_syntax(name)
+      if syntax_obj
+          syntax=syntax_obj[:syntax]
+          if syntax.is_a?(Array)
+              if syntax[0][:type]=='INTEGER'
+                  syntax=Hash[syntax.select{|el| el[:enum]}.map{|enum| [enum[:enum][:value].to_i, enum[:enum][:name].to_s]}]
+                  if syntax[value]
+                      if syntax_obj[:name]=='CfgTypeBoolean' || syntax_obj[:name]=='TruthValue'
+                          return syntax[value].to_b
+                      else
+                          return syntax[value]
+                      end
+                  end
+              end
+          end
+      end
+      return value
     end
 
     #

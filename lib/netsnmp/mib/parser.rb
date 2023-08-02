@@ -15,7 +15,7 @@ module NETSNMP::MIB
     end
 
     def curly(atom)
-      str("{") >> space.repeat >> atom >> space.repeat >> str("}")
+      space.repeat >> str("{") >> space.repeat >> atom >> space.repeat >> str("}")
     end
 
     def bracketed(atom)
@@ -547,7 +547,7 @@ module NETSNMP::MIB
         spaced("STATUS") >> spaced { status } >>
         spaced("DESCRIPTION") >> spaced { text } >>
         spaced { refer_part }.maybe >>
-        spaced("SYNTAX") >> syntax) |
+        spaced { syntax_part }) |
         syntax
     end
 
@@ -587,6 +587,7 @@ module NETSNMP::MIB
 
     rule(:simple_syntax) do
       (spaced { str("INTEGER").as(:type) } >> (integer_subtype | enum_spec).maybe) |
+        (spaced { str("Integer32").as(:type) } >> (integer_subtype | enum_spec).maybe) |
         (spaced { str("Integer32").as(:type) >> space } >> integer_subtype.maybe) |
         (spaced { str("OCTET STRING").as(:type) } >> octetstring_subtype.maybe) |
         (spaced { str("OBJECT IDENTIFIER").as(:type) } >> any_subtype) |
@@ -689,11 +690,11 @@ module NETSNMP::MIB
     rule(:status) { lowercase_identifier }
 
     rule(:uppercase_identifier) do
-      match("[A-Z]") >> match("[A-Za-z0-9-]").repeat
+      match("[A-Z]") >> match("[A-Za-z0-9_-]").repeat
     end
 
     rule(:lowercase_identifier) do
-      match("[a-z]") >> match("[A-Za-z0-9-]").repeat
+      match("[a-z]") >> match("[A-Za-z0-9_-]").repeat
     end
 
     rule(:type_smi_and_sppi) do
